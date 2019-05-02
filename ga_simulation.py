@@ -27,11 +27,6 @@ import random
 # loads in the Kivy file
 Builder.load_file('fish.kv')
 
-
-# Global Constants for the Radii of the food and the poison
-POISON_RADIUS = 10
-FOOD_RADIUS = 10
-
 # Global Constant for the number of fishes
 NUM_FISHES = 20
 
