@@ -1,3 +1,5 @@
+# Library imports
+
 from kivy.app import App
 from kivy.uix.widget import Widget
 from kivy.uix.relativelayout import RelativeLayout
@@ -22,15 +24,6 @@ from scipy import stats
 import random
 
 
-# TODO:
-'''
-correlate decay rate in accordance to size, the smaller you are the slower you decay
-correlate health to the size
-introduce poison resistance
-introduce health from food parameter
-'''
-
-
 # loads in the Kivy file
 Builder.load_file('fish.kv')
 
@@ -43,8 +36,6 @@ FOOD_RADIUS = 10
 NUM_FISHES = 20
 
 # Function to compute Distance between two points (coordinates)
-
-
 def compute_distance(center_point, dest_point):
     distance = np.sqrt(np.square(
         dest_point[0] - center_point[0]) + np.square(dest_point[1] - center_point[1]))
@@ -58,23 +49,29 @@ def normalize_magnitude(vector):
         vector = Vector(vector) * (1 / magnitude)
     return vector
 
+
 # a = 2 b = 5
+# Target Function
 def kamaruswamy(x,a,b):
     if x < 1 and x > 0:
         return a*b*(x**(a-1))*(1-(x**a))**(b-1)
 
+# Helper Factorial Function
 def factorial(n):
     return (n/math.e) * math.sqrt(math.pi *(2*n + (1/3)))
+
 # a= 2.71 b = 5.39
+# Proposal Function
 def beta(x,a,b):
     gamma = (factorial(a-1) * factorial(b-1))/factorial(a + b -1)
     pdf   = ((x**(a-1))*((1-x)**(b-1)))/gamma
     return pdf
 
+# accept reject algorithm
 def accept_reject():
     m = .646
     k = 0 # number accepted
-    i = 1000 # numbter iterations
+    i = 1000 # number iterations
     n = 6
     saved = []
 
@@ -82,15 +79,12 @@ def accept_reject():
         u = random.random()
         y = random.random()
 
-        #print(kamaruswamy(y,2,5)/beta(y,4,6))
-        if u*m < kamaruswamy(y,2,5)/beta(y,2.71,5.39):
+        if u*m < kamaruswamy(y,2.5,5.17)/beta(y,1.97,6.6):
             k += 1
             saved.append(y)
     return saved
 
 # Class for the Fish
-
-
 class Fish(Widget):
 
     # Color values designated for health
@@ -346,8 +340,6 @@ class FoodRadius(Widget):
 
 
 ''' The two classes below are placeholders that will be inherently invoked through the kivy file '''
-
-
 class Food(Widget):
     pass
 
@@ -373,15 +365,12 @@ class FishSimulation(Widget):
     start_new_gen = BooleanProperty(False)
     avg_fitness = NumericProperty(0)
 
+    # initial population of fishes and food and poison in the first generation
     def populate_fishes_and_food(self):
-        ''' Debugging to print the height and the width of the  actual screen'''
-        # print(self.height)
-        # print(self.width)
+
         for i in range(NUM_FISHES):
             fish = Fish()
             fish.initialize_beginning()
-            # print(fish.dna)
-            # print(fish.health)
             poison_radius = PoisonRadius()
             food_radius = FoodRadius()
             poison_radius.initialize(
@@ -392,7 +381,7 @@ class FishSimulation(Widget):
             self.add_widget(fish)
             self.fish_list.append(fish)
             self.fish_list_genetic_pool.append(fish)
-            # print(fish.color_val)
+
         for i in range(int(NUM_FISHES * 5)):
             food = Food()
             poison = Poison()
@@ -418,7 +407,9 @@ class FishSimulation(Widget):
             self.food_dict[food_coord] = food
             self.poison_dict[poison_coord] = poison
 
-    def populate_fishes(self):
+    # populating the fishes from the genetic algorithm
+    def populate_fishes_from_genetic_algorithm(self):
+
         fitness_list, total_score = compute_fitness(
             self.fish_list_genetic_pool)
         selection_pool = compute_selection(fitness_list, total_score)
@@ -427,8 +418,6 @@ class FishSimulation(Widget):
             new_dna_list = compute_recombination(selection_pool)
             fish = Fish()
             fish.initialize_from_DNA(new_dna_list)
-            # print(fish.dna)
-            # print(fish.health)
             poison_radius = PoisonRadius()
             food_radius = FoodRadius()
             poison_radius.initialize(
@@ -440,7 +429,9 @@ class FishSimulation(Widget):
             self.fish_list.append(fish)
             self.fish_list_genetic_pool.append(fish)
 
+    # Populating the food and the poison on the sceen
     def populate_food_and_poison(self):
+
         for child in self.children:
             self.remove_widget(child)
 
@@ -474,14 +465,18 @@ class FishSimulation(Widget):
             self.food_dict[food_coord] = food
             self.poison_dict[poison_coord] = poison
 
+    # function that initializes the fishes' initial velocity and direction
     def serve_fishes(self):
+
         for fish in self.fish_list:
             fish.center = self.center_x + \
                 randint(-200, 200), self.center_y + randint(-200, 200)
             fish.velocity = Vector(randrange(-fish.max_velocity, fish.max_velocity),
                                    randrange(-fish.max_velocity, fish.max_velocity))
 
+    # Function that allows fish to eat poison
     def eat_food(self, fish, food_count, food_in_radius, current_pos):
+
         for coord in self.food_dict:
             if fish.size_val < FOOD_RADIUS:
                 if (current_pos[0] <= coord[0] + 10 and current_pos[0] >= coord[0] - 10) and (current_pos[1] <= coord[1] + 10 and current_pos[1] >= coord[1] - 10):
@@ -536,7 +531,9 @@ class FishSimulation(Widget):
                 seek = normalize_magnitude(seek) * fish.max_force
                 fish.applyForce(seek)
 
+    # Function that allows fish to eat poison
     def eat_poison(self, fish, poison_count, poison_in_radius, current_pos):
+
         for coord in self.poison_dict:
             if fish.size_val < POISON_RADIUS:
                 if (current_pos[0] <= coord[0] + 5 and current_pos[0] >= coord[0] - 5) and (current_pos[1] <= coord[1] + 5 and current_pos[1] >= coord[1] - 5):
@@ -554,7 +551,6 @@ class FishSimulation(Widget):
 
                     fish.health = fish.health * 0.5
 
-            # if coord in self.poison_dict:
             else:
                 if ((coord[0] - current_pos[0])**2 + (coord[1] - current_pos[1])**2) <= (fish.size_val / 2)**2:
                     poison_coord = randint(0, 800), randint(0, 600)
@@ -591,7 +587,9 @@ class FishSimulation(Widget):
                 seek = normalize_magnitude(seek) * fish.max_force
                 fish.applyForce(seek)
 
+    # Function for bootstrap
     def bootstrap(self):
+
         n = len(self.fish_fitness_gen)
 
         B = 10000
@@ -609,6 +607,7 @@ class FishSimulation(Widget):
         print('bootstrap 95% ci: ' +
               '(' + str(ci_lower) + ', ' + str(ci_upper) + ')')
 
+    # Function for jackknife
     def jackknife(self):
         n = len(self.fish_fitness_gen)
 
@@ -628,6 +627,7 @@ class FishSimulation(Widget):
         print('jackknife bias of estimate: ' + str(bias_jackknife))
         print()
 
+    # function for the permutation test
     def permutationTest(self):
         B = 10000
 
@@ -661,6 +661,7 @@ class FishSimulation(Widget):
         print('computed p_value: ' + str(p_value))
         print()
 
+    # update function to update on each time step
     def update(self, dt):
         count = 1
 
@@ -668,7 +669,7 @@ class FishSimulation(Widget):
             self.gen_count += 1
             self.gen_val = "Generation " + str(self.gen_count)
             self.populate_food_and_poison()
-            self.populate_fishes()
+            self.populate_fishes_from_genetic_algorithm()
             self.serve_fishes()
             self.start_new_gen = False
 
@@ -737,6 +738,7 @@ class FishSimulation(Widget):
                 self.fish_fitness_gen = []
 
 
+# class that runs the simulation
 class FishApp(App):
     def build(self):
         game = FishSimulation()
