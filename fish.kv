@@ -1,0 +1,63 @@
+#:kivy 1.0.9
+
+<Fish>:
+    size: self.size_val, self.size_val
+    canvas:
+        PushMatrix
+        Rotate:
+            angle: self.angle
+            origin: self.center
+        Ellipse:
+            pos: self.pos
+            size: self.size
+        Color:
+            rgba: self.color_val
+        PopMatrix
+
+
+<PoisonRadius>:
+    canvas:
+        Color:
+            rgba: 1,0,0,1
+        Line:
+            circle: self.cx, self.cy, self.radius
+
+<FoodRadius>:
+    canvas:
+        Color:
+            rgba: 0,1,0,1
+        Line:
+            circle: self.cx, self.cy, self.radius
+
+<Food>:
+    size: 10, 10
+    canvas:
+        Color:
+            rgba: 0,1,0,1
+        Ellipse:
+            pos: self.pos
+            size: self.size
+
+<Poison>:
+    size: 10, 10
+    canvas:
+        Color:
+            rgba: 1,0,0,1
+        Ellipse:
+            pos: self.pos
+            size: self.size
+
+<FishSimulation>:
+    Label:
+        font_size: 70  
+        center_x: root.width / 2
+        center_y: root.height/2
+        top: root.top - 50
+        text: root.gen_val
+
+
+
+
+
+
+        
