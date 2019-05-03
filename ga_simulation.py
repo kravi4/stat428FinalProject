@@ -45,7 +45,7 @@ def normalize_magnitude(vector):
     return vector
 
 
-# a = 2 b = 5
+# a = 2.5 b = 5.17
 # Target Function
 def kamaruswamy(x,a,b):
     if x < 1 and x > 0:
@@ -55,7 +55,7 @@ def kamaruswamy(x,a,b):
 def factorial(n):
     return (n/math.e) * math.sqrt(math.pi *(2*n + (1/3)))
 
-# a= 2.71 b = 5.39
+# a= 1.97 b = 6.6
 # Proposal Function
 def beta(x,a,b):
     gamma = (factorial(a-1) * factorial(b-1))/factorial(a + b -1)
@@ -473,7 +473,7 @@ class FishSimulation(Widget):
     def eat_food(self, fish, food_count, food_in_radius, current_pos):
 
         for coord in self.food_dict:
-            if fish.size_val < FOOD_RADIUS:
+            if fish.size_val < fish.food_rad:
                 if (current_pos[0] <= coord[0] + 10 and current_pos[0] >= coord[0] - 10) and (current_pos[1] <= coord[1] + 10 and current_pos[1] >= coord[1] - 10):
                     food_coord = randint(0, 800), randint(0, 600)
 
@@ -530,7 +530,7 @@ class FishSimulation(Widget):
     def eat_poison(self, fish, poison_count, poison_in_radius, current_pos):
 
         for coord in self.poison_dict:
-            if fish.size_val < POISON_RADIUS:
+            if fish.size_val < fish.poison_rad:
                 if (current_pos[0] <= coord[0] + 5 and current_pos[0] >= coord[0] - 5) and (current_pos[1] <= coord[1] + 5 and current_pos[1] >= coord[1] - 5):
                     poison_coord = randint(0, 800), randint(0, 600)
 
